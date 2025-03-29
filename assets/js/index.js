@@ -168,107 +168,105 @@ function createAlertDiv() {
 }
 
 function getRoutes(e) {
-  if (e) {
-    e.preventDefault();
-  }
-  const firstTr = document.querySelector("table thead tr");
-  firstTr.replaceChildren();
+  if (e) e.preventDefault();
+  const theadTr = document.querySelector("table thead tr");
+  theadTr.replaceChildren();
+
   let startStation = camelCase(document.getElementById("fromStation").value);
-  let endStation = document.getElementById("toStation").value; // camelCase(document.getElementById('toStation').value)
+  let endStation = document.getElementById("toStation").value;
 
   const allPath = getAllPaths(graph, startStation, endStation);
   console.log(allPath);
+
   if (allPath.length === 2) {
     const shortestPathIndex = shortestPathFinder(allPath);
     const shortestPath = allPath[shortestPathIndex].path;
     const secondPath = allPath[shortestPathIndex === 0 ? 1 : 0].path; // we can only have 2 path so if one element index is 0 then other will have index 1;
+
     console.log("shortest route is: ", shortestPath);
     console.log("2nd route is: ", secondPath);
-    const shortestPathChanged = howMuchTimeMetroChanged(shortestPath);
-    let fastestRoute = null;
-    if (shortestPathChanged === 0) {
-      fastestRoute = shortestPath;
-    } else {
-      const otherRouteLineCount = howMuchTimeMetroChanged(secondPath);
-      shortestPathChanged > otherRouteLineCount
-        ? (fastestRoute = secondPath)
-        : (fastestRoute = shortestPath);
-    }
-    console.log("fastest route is: ", fastestRoute);
 
-    const result = renderList(shortestPath, startStation, "shortest"); // returns ul tag containing shortes path as list
-    result.classList.add("vertical-steps", "list-group");
-    //make a new th element
-    const firstTr = document.querySelector("table thead tr");
-    const firstTh = document.createElement("th");
-    if (shortestPath !== fastestRoute) {
-      firstTh.innerHTML = `<div class="lh-1">
-                      <p>Shortest Route</p>
-                      <p class="fs-6 fw-light">(May need to change Metro!)</p>
-                      </div>`;
-    }else{
-      firstTh.innerHTML = `<div class="lh-1">
-                      <p>Fastest Route</p>
-                      <p class="fs-6 fw-light">(and Shortest Route too)</p>
-                      </div>`;
-    }
-    firstTr.appendChild(firstTh);
-    const tableShortestColumn = document.getElementById("shortest-route");
-    tableShortestColumn.replaceChildren();
-    tableShortestColumn.appendChild(result);
+    // rendering First path
+    const firstPath = renderList(shortestPath, startStation, "shortest"); // returns ul tag containing shortes path as list
+    firstPath.classList.add("vertical-steps", "list-group");
+    appendToTableColumn("shortest-route", firstPath);
 
+    // rendering second path
     const alternatePath = renderList(secondPath, startStation, "shortest");
     alternatePath.classList.add("vertical-steps", "list-group");
+    appendToTableColumn("fastest-route", alternatePath);
 
-    //make a new th element
-    const secondTr = document.querySelector("table thead tr");
-    const secondTh = document.createElement("th");
-    if (shortestPath !== fastestRoute) {
-      secondTh.innerHTML = `<div class="lh-1">
-                      <p>Fastest Route</p>
-                      <p class="fs-6 fw-light">(No need to change Metro)</p>
+    // adding meaning full headings to the columns
+    function addTableHeadingForMeaningFullInfo() {
+      const shortestPathChanged = howMuchTimeMetroChanged(shortestPath);
+      let fastestRoute = null;
+
+      if (shortestPathChanged === 0) {
+        fastestRoute = shortestPath;
+      } else {
+        const otherRouteLineCount = howMuchTimeMetroChanged(secondPath);
+        shortestPathChanged > otherRouteLineCount
+          ? (fastestRoute = secondPath)
+          : (fastestRoute = shortestPath);
+      }
+      console.log("fastest route is: ", fastestRoute);
+
+      function createTableHead(title1, subtitle1, title2, subtitle2) {
+        //make a new th element
+        const firstTr = document.querySelector("table thead tr");
+        const firstTh = document.createElement("th");
+        if (shortestPath !== fastestRoute) {
+          firstTh.innerHTML = `<div class="lh-1">
+                      <p>${title1}</p>
+                      <p class="fs-6 fw-light">${subtitle1}</p>
                       </div>`;
-    }else{
-      secondTh.innerHTML = `<div class="lh-1">
-                      <p>Alternate Route</p>
-                      <p class="fs-6 fw-light">(longer route)</p>
+        } else {
+          firstTh.innerHTML = `<div class="lh-1">
+                      <p>${title2}</p>
+                      <p class="fs-6 fw-light">${subtitle2}</p>
                       </div>`;
+        }
+        firstTr.appendChild(firstTh);
+      }
+
+      createTableHead(
+        "Shortest Route",
+        "(May need to change Metro!)",
+        "Fastest Route",
+        "(and Shortest Route too)"
+      );
+      createTableHead(
+        "Fastest Route",
+        "(No need to change Metro)",
+        "Alternate Route",
+        "(longer route)"
+      );
     }
-    secondTr.appendChild(secondTh);
-    const tableAlternatePathColumn = document.getElementById("fastest-route");
-    tableAlternatePathColumn.replaceChildren();
-    tableAlternatePathColumn.appendChild(alternatePath);
 
+    addTableHeadingForMeaningFullInfo();
   } else {
-    const result = renderList(allPath[0].path, startStation, "shortest"); // returns ul tag containing shortes path as list
+    const result = renderList(allPath[0].path, startStation, "shortest"); // returns ul tag containing paths as list
     result.classList.add("vertical-steps", "list-group");
-    const tableShortestColumn = document.getElementById("shortest-route");
-    tableShortestColumn.replaceChildren();
-    tableShortestColumn.appendChild(result);
-
-    const tableAlternatePathColumn = document.getElementById("fastest-route");
-    tableAlternatePathColumn.replaceChildren();
+    appendToTableColumn("shortest-route", result);
+    appendToTableColumn("fastest-route", null);
   }
+}
 
-  document.getElementById(
-    "info"
-  ).innerHTML = `😊 Route found from ${startStation} to ${endStation}`;
+function appendToTableColumn(columnId, content) {
+  const column = document.getElementById(columnId);
+  column.replaceChildren();
+  if (content) column.appendChild(content);
 }
 
 function renderList(path, startStation, typeOfRoute) {
   if (path) {
     foundPath = path;
     const ul = document.createElement("ul");
-    // while (ul.firstChild) {
-    //   ul.removeChild(ul.firstChild); // clear ul for new li s
-    // }
     const li = document.createElement("li");
     li.textContent = startStation;
     li.setAttribute(
       "class",
-      `list-group-item completed ${
-        startStation === "Akashvani" ? "blue" : findColor(startStation)
-      }`
+      `list-group-item completed ${findColor(startStation)}`
     );
     ul.appendChild(li);
 
@@ -276,14 +274,13 @@ function renderList(path, startStation, typeOfRoute) {
       const currentStation = camelCase(path[i]);
       const nextStation = camelCase(path[i + 1]);
       currentNextStation = nextStation;
-      var detected =
-        typeOfRoute === "convenient" ? "blue" : findColor(nextStation);
+      var detected = findColor(nextStation);
 
       const li = document.createElement("li");
       li.textContent = nextStation;
       li.setAttribute("class", `list-group-item completed  ${detected} `);
       if (
-        currentStation.toLowerCase() == "khemni chak" ||
+        currentStation.toLowerCase() === "khemni chak" ||
         currentStation.toLowerCase() === "patna junction"
       ) {
         ul.lastElementChild.style.borderColor = detected;
@@ -369,7 +366,7 @@ function howMuchTimeMetroChanged(path) {
   let counter = 0;
   for (let i = 0; i < path.length; i++) {
     if (path[i] === "Patna Junction" || path[i] === "Khemni Chak") {
-      if (i === 0 || i === path.length - 1) {
+      if (i === 0 || i === path.length - 1) { // checking if junction is at starting or ending so we can skip calculating
         continue;
       } else {
         const previousStationcolor = findColor(path[i - 1]);
