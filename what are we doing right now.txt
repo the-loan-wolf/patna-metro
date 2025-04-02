@@ -1,0 +1,40 @@
+what are we doing right now:
+
+1. get start and end destination
+2. finding all the possible path between them
+3. check how much path are there!
+4. if there is only one path then render it.
+5. if there are 2 paths:
+6. find the shortest path
+7. render the shortest path first and then the 2nd path
+8. now we will try to decide which heading we should put for the both paths.
+9. count how much time metro will change it's line for the shortest path.
+10. if there is no change of line in shortest path then it is the fastest route too
+11. if not then count how much time metro will change it's line for the 2nd path.
+12. now compare line change for both path and find which path contain least line change, that path is the fastest.
+13. now we will give heading to the first column:
+14. if shortest path is the fastest path then heading will be "Fastest Route(and Shortest Route too)" if not then "Shortest Route(May need to change Metro!)"
+15. now we will give heading to the 2nd column:
+16. if shortest path is the fastest path then heading will be "Alternate Route(longer Route)" if not then "Fastest Route(No need to change Metro)"
+
+what we should be doing right now:
+
+1. get start and end destination
+2. finding all the possible path between them
+3. check how much path are there!
+4. if there is only one path then render it.
+5. if there are 2 paths:
+6. find the shortest path
+7. count how much time metro will switch it's line for the shortest path.
+8. if there is no switch of line in shortest path then it is the fastest route too
+9. if not then count how much time metro will change it's line for the 2nd path.
+10. now compare line change for both path and find which path contain least line change, that path is the fastest.
+11. 
+12. 
+13. now we will give heading to the first column:
+14. if shortest path is the fastest path then heading will be "Fastest Route(and Shortest Route too)" if not then "Shortest Route(May need to change Metro!)"
+15. now we will give heading to the 2nd column:
+16. if shortest path is the fastest path then heading will be "Alternate Route(longer Route)" if not then "Fastest Route(No need to change Metro)"
+
+render the shortest path first and then the 2nd path
+now we will try to decide which heading we should put for the both paths.
