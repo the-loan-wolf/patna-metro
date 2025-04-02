@@ -179,6 +179,7 @@ function getRoutes(e) {
   console.log(allPath);
 
   if (allPath.length === 2) {
+    let fastestRoute = null;
     const shortestPathIndex = shortestPathFinder(allPath);
     const shortestPath = allPath[shortestPathIndex].path;
     const secondPath = allPath[shortestPathIndex === 0 ? 1 : 0].path; // we can only have 2 path so if one element index is 0 then other will have index 1;
@@ -186,20 +187,8 @@ function getRoutes(e) {
     console.log("shortest route is: ", shortestPath);
     console.log("2nd route is: ", secondPath);
 
-    // rendering First path
-    const firstPath = renderList(shortestPath, startStation, "shortest"); // returns ul tag containing shortes path as list
-    firstPath.classList.add("vertical-steps", "list-group");
-    appendToTableColumn("shortest-route", firstPath);
-
-    // rendering second path
-    const alternatePath = renderList(secondPath, startStation, "shortest");
-    alternatePath.classList.add("vertical-steps", "list-group");
-    appendToTableColumn("fastest-route", alternatePath);
-
-    // adding meaning full headings to the columns
-    function addTableHeadingForMeaningFullInfo() {
+    function findFastestRoute() {
       const shortestPathChanged = howMuchTimeMetroChanged(shortestPath);
-      let fastestRoute = null;
 
       if (shortestPathChanged === 0) {
         fastestRoute = shortestPath;
@@ -210,40 +199,54 @@ function getRoutes(e) {
           : (fastestRoute = shortestPath);
       }
       console.log("fastest route is: ", fastestRoute);
-
-      function createTableHead(title1, subtitle1, title2, subtitle2) {
-        //make a new th element
-        const firstTr = document.querySelector("table thead tr");
-        const firstTh = document.createElement("th");
-        if (shortestPath !== fastestRoute) {
-          firstTh.innerHTML = `<div class="lh-1">
-                      <p>${title1}</p>
-                      <p class="fs-6 fw-light">${subtitle1}</p>
-                      </div>`;
-        } else {
-          firstTh.innerHTML = `<div class="lh-1">
-                      <p>${title2}</p>
-                      <p class="fs-6 fw-light">${subtitle2}</p>
-                      </div>`;
-        }
-        firstTr.appendChild(firstTh);
-      }
-
-      createTableHead(
-        "Shortest Route",
-        "(May need to change Metro!)",
-        "Fastest Route",
-        "(and Shortest Route too)"
-      );
-      createTableHead(
-        "Fastest Route",
-        "(No need to change Metro)",
-        "Alternate Route",
-        "(longer route)"
-      );
     }
 
-    addTableHeadingForMeaningFullInfo();
+    findFastestRoute();
+
+    // Render fastest path first
+    const firstPath = renderList(fastestRoute, startStation, "shortest"); // returns ul tag containing shortes path as list
+    firstPath.classList.add("vertical-steps", "list-group");
+    appendToTableColumn("shortest-route", firstPath);
+
+    const slowestPath =
+      fastestRoute == shortestPath ? secondPath : shortestPath;
+
+    // rendering second path
+    const alternatePath = renderList(slowestPath, startStation, "shortest");
+    alternatePath.classList.add("vertical-steps", "list-group");
+    appendToTableColumn("fastest-route", alternatePath);
+
+    function createTableHead(title1, subtitle1, title2, subtitle2) {
+      //make a new th element
+      const firstTr = document.querySelector("table thead tr");
+      const firstTh = document.createElement("th");
+      if (shortestPath !== fastestRoute) {
+        firstTh.innerHTML = `<div class="lh-1">
+                        <p>${title1}</p>
+                        <p class="fs-6 fw-light">${subtitle1}</p>
+                        </div>`;
+      } else {
+        firstTh.innerHTML = `<div class="lh-1">
+                        <p>${title2}</p>
+                        <p class="fs-6 fw-light">${subtitle2 || " "}</p>
+                        </div>`;
+      }
+      firstTr.appendChild(firstTh);
+    }
+
+    createTableHead(
+      "Best Route",
+      "(No need to switch Metro)",
+      "Best Route",
+      "(It's the shortest route)"
+    );
+
+    createTableHead(
+      "Shortest Route",
+      "(Need to switch Metro!)",
+      "2nd Route",
+      "(longer Alternate Route)"
+    );
   } else {
     const result = renderList(allPath[0].path, startStation, "shortest"); // returns ul tag containing paths as list
     result.classList.add("vertical-steps", "list-group");
