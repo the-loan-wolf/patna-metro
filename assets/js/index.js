@@ -212,7 +212,7 @@ function getRoutes(e) {
       fastestRoute == shortestPath ? secondPath : shortestPath;
 
     // rendering second path
-    const alternatePath = renderList(slowestPath, startStation, "shortest");
+    const alternatePath = renderList(slowestPath, startStation, "not-shortest");
     alternatePath.classList.add("vertical-steps", "list-group");
     appendToTableColumn("fastest-route", alternatePath);
 
@@ -259,6 +259,10 @@ function appendToTableColumn(columnId, content) {
   const column = document.getElementById(columnId);
   column.replaceChildren();
   if (content) column.appendChild(content);
+  if (columnId === "shortest-route") {
+    column.style.backgroundColor = "#ccffcc"
+    column.style.borderRadius = "30px"
+  }
 }
 
 function renderList(path, startStation, typeOfRoute) {
@@ -269,7 +273,7 @@ function renderList(path, startStation, typeOfRoute) {
     li.textContent = startStation;
     li.setAttribute(
       "class",
-      `list-group-item completed ${findColor(startStation)}`
+      `list-group-item completed ${findColor(startStation)} ${typeOfRoute === "shortest" ? "green-bg" : ""}`
     );
     ul.appendChild(li);
 
@@ -281,7 +285,7 @@ function renderList(path, startStation, typeOfRoute) {
 
       const li = document.createElement("li");
       li.textContent = nextStation;
-      li.setAttribute("class", `list-group-item completed  ${detected} `);
+      li.setAttribute("class", `list-group-item completed  ${detected} ${typeOfRoute === "shortest" ? "green-bg" : ""} `);
       if (
         currentStation.toLowerCase() === "khemni chak" ||
         currentStation.toLowerCase() === "patna junction"
